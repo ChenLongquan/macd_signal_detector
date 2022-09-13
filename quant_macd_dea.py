@@ -7,7 +7,7 @@ import scipy.signal as signal
 import scipy
 from matplotlib.pyplot import MultipleLocator
 
-detect_cross_period = 80
+detect_cross_period = 180
 class gold_death_cross():
     def detect_gold_cross(self,df,lineEdit):
         gold_cross_point_underzero = []
@@ -22,28 +22,74 @@ class gold_death_cross():
                     gold_cross_point_abovezero.append(i)
 
         if len(gold_cross_point_underzero) > 0:
-            if (df['dif'][gold_cross_point_underzero[0]] < 0) & (df['dea'][gold_cross_point_underzero[0]] < 0):
-                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_underzero[0]]) + '处发现DIF0轴以下的黄金交叉')
-            for i in range(len(gold_cross_point_underzero)-1):
-                if df['dif'][gold_cross_point_underzero[i]:gold_cross_point_underzero[i+1]].max() < 0:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_underzero[i+1]])+'处发现DIF0轴以下的二次黄金交叉')
-                else:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_underzero[i]]) + '处发现DIF0轴以下的黄金交叉')
+            for i in range(len(gold_cross_point_underzero)):
+                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_underzero[i]])+'处发现DIF0轴以下的'+str(i+1)+'次黄金交叉')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生一次DIF0轴以下黄金交叉，需判断，是突破下降趋势线的黄金交叉（1浪），还是在一波牛市后，首次发生在空方的黄金交叉（5浪）')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生二次DIF0轴以下黄金交叉，<font color=\"#DAA520\">表明市场经过了充分的调整</font>，预示后市很可能有大幅上涨；要注意与背离、价格趋势线结合使用')
             lineEdit.append('-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -')
 
         if len(gold_cross_point_abovezero) > 0:
-            if (df['dif'][gold_cross_point_abovezero[0]]>0) & (df['dea'][gold_cross_point_abovezero[0]]>0):
-                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_abovezero[0]]) + '处发现DIF0轴以上的黄金交叉')
-            for i in range(len(gold_cross_point_abovezero)-1):
-                if df['dif'][gold_cross_point_abovezero[i]:gold_cross_point_abovezero[i+1]].min() > 0:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在'+str(df['trade_date'][gold_cross_point_abovezero[i+1]])+'处发现DIF0轴以上的二次黄金交叉')
-                else:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_abovezero[i]]) + '处发现DIF0轴以上的黄金交叉')
+            for i in range(len(gold_cross_point_abovezero)):
+                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][gold_cross_point_abovezero[i]]) + '处发现DIF0轴以上的'+str(i+1)+'次黄金交叉')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生一次DIF0轴以上黄金交叉，<font color=\"#DAA520\">买入成功率较高</font>，每一次在0轴之上以及0轴附近的黄金交叉都是加仓机会。但加仓要等价格拉开幅度，<font color=\"#DAA520\">不要在一个区间密集加仓</font>；最好采用正金字塔加仓法。')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生二次DIF0轴以上黄金交叉，<font color=\"#DAA520\">绝佳的做多机会</font>；若指标在0轴之下经过长期震荡后，首次突破0轴发生的二次黄金交叉，这种机会往往在一波大牛市的初始阶段才会有的机会，是效用最大的入场机会；应该发生在0轴之上附近的位置,而不能是发生在高位的黄金交叉')
             lineEdit.append('-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -')
+
+    def detect_gold_cross_all(self,df):
+        gold_cross_point = []
+        for i in range(len(df)-detect_cross_period,len(df)):
+            if (df['dif'][i-1] < df['dea'][i-1]) & (df['dif'][i] > df['dea'][i]):
+                gold_cross_point.append(i)
+
+        results = []
+        if len(gold_cross_point) > 1:
+            start_idx = 0
+            if (len(gold_cross_point) > 3):
+                start_idx = len(gold_cross_point) - 3
+            sub_gold_cross_point = gold_cross_point[start_idx:]
+            if (df['dif'][sub_gold_cross_point[-1]] - df['dif'][sub_gold_cross_point[0]] > 0):
+                results.append('大于0')
+            else:
+                results.append('小于0')
+            if (df['dif'][sub_gold_cross_point[-1]] - df['dif'][sub_gold_cross_point[-2]] > 0):
+                results.append('大于0')
+            else:
+                results.append('小于0')        
+            for i in range(len(sub_gold_cross_point)):
+                above_zero='上'
+                if (df['dif'][sub_gold_cross_point[i]]<0):
+                    above_zero='下'
+                results.append(str(df['trade_date'][sub_gold_cross_point[i]])+'， DIF0轴以'+above_zero)
+        
+        return results
+
+    def detect_dead_cross_all(self,df):
+        dead_cross_point = []
+        for i in range(len(df)-detect_cross_period,len(df)):
+            if (df['dif'][i-1] > df['dea'][i-1]) & (df['dif'][i] < df['dea'][i]):
+                dead_cross_point.append(i)
+
+        results = []
+        if len(dead_cross_point) > 1:
+            start_idx = 0
+            if (len(dead_cross_point) > 3):
+                start_idx = len(dead_cross_point) - 3
+            sub_dead_cross_point = dead_cross_point[start_idx:]
+            if (df['dif'][sub_dead_cross_point[-1]] - df['dif'][sub_dead_cross_point[0]] > 0):
+                results.append('大于0')
+            else:
+                results.append('小于0')
+            if (df['dif'][sub_dead_cross_point[-1]] - df['dif'][sub_dead_cross_point[-2]] > 0):
+                results.append('大于0')
+            else:
+                results.append('小于0')        
+            for i in range(len(sub_dead_cross_point)):
+                above_zero='上'
+                if (df['dif'][sub_dead_cross_point[i]]<0):
+                    above_zero='下'
+                results.append(str(df['trade_date'][sub_dead_cross_point[i]])+'， DIF0轴以'+above_zero)
+        
+        return results
 
     def detect_death_cross(self,df,lineEdit):
         death_cross_point_underzero = []
@@ -58,28 +104,15 @@ class gold_death_cross():
                     death_cross_point_abovezero.append(i)
 
         if len(death_cross_point_underzero) > 0:
-            if (df['dif'][death_cross_point_underzero[0]] < 0) & (df['dea'][death_cross_point_underzero[0]] < 0):
-                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][death_cross_point_underzero[0]]) + '处发现DIF0轴以下的死亡交叉')
-            for i in range(len(death_cross_point_underzero)-1):
-                if df['dif'][death_cross_point_underzero[i]:death_cross_point_underzero[i+1]].max() < 0:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][death_cross_point_underzero[i+1]])+'处发现DIF0轴以下的二次死亡交叉')
-                else:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][death_cross_point_underzero[i]]) + '处发现DIF0轴以下的死亡交叉')
+            for i in range(len(death_cross_point_underzero)):
+                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][death_cross_point_underzero[i]])+'处发现DIF0轴以下的'+str(i+1)+'次死亡交叉')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生一次DIF0轴以下死亡交叉，<font color=\"#DAA520\">通常处于熊市中一波反弹的高位，是卖出信号</font>，如果不能重回0轴之上则说明空方还是占有统治地位，后市仍以看跌为主；若在0轴之下的黄金交叉抄底之后，经过一波反弹，在0轴之下靠近0轴的位置又发生死亡交叉，这时是无条件离场是合理的选择。')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生二次DIF0轴以下死亡交叉，<font color=\"#DAA520\">无条件离场</font>。一般发生在大熊市的下跌C浪或下跌延长浪；两次死亡交叉应发生在0轴之下0轴附近，是经过小幅反弹后的连续两次死亡交叉，而不能是发生在低位的死亡交叉')
             lineEdit.append('-   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -')
 
         if len(death_cross_point_abovezero) > 0:
-            if (df['dif'][death_cross_point_abovezero[0]] > 0) & (df['dea'][death_cross_point_abovezero[0]] > 0):
-                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(
-                    df['trade_date'][death_cross_point_abovezero[0]]) + '处发现DIF0轴以上的死亡交叉')
-            for i in range(len(death_cross_point_abovezero) - 1):
-                if df['dif'][death_cross_point_abovezero[i]:death_cross_point_abovezero[i + 1]].min() > 0:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(
-                        df['trade_date'][death_cross_point_abovezero[i + 1]]) + '处发现DIF0轴以上的二次死亡交叉')
-                else:
-                    lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(
-                        df['trade_date'][death_cross_point_abovezero[i]]) + '处发现DIF0轴以上的死亡交叉')
+            for i in range(len(death_cross_point_abovezero)):
+                lineEdit.append('过去' + str(detect_cross_period) + '天，在' + str(df['trade_date'][death_cross_point_abovezero[i]]) + '处发现DIF0轴以上的'+str(i+1)+'次死亡交叉')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生一次DIF0轴以上死亡交叉，通常0轴之上的死亡交叉发生在多方主导的大趋势中，它说明在大级别的上升趋势中有发生调整的可能，,<font color=\"#DAA520\">是中、短期顶部的标志</font>；应对策略：稳健做法是先了解一部分仓位，若卖出后股价没有明显下跌又创新高及时补仓；死亡交叉发生在高档区、结合趋势线等更有效，')
             lineEdit.append('<font color=\"#CD5C5C\">Tips</font>:发生二次DIF0轴以上死亡交叉是对前一次交叉的确认,0轴上的第二次死亡交叉是可靠的卖出信号；最好与背离、价格趋势线相互验证,<font color=\"#DAA520\">在高位背离后的第二个死亡交叉，后市最大的可能是出现暴跌</font>')
 

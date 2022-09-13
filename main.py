@@ -17,6 +17,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QLabel, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QTextEdit, QTextBrowser, QHBoxLayout, QVBoxLayout
 import time
+import datetime
 
 class GUI(QMainWindow):
     def __init__(self):
@@ -45,11 +46,13 @@ class GUI(QMainWindow):
 
 
     def buttonClicked(self):
-        ts.set_token('')#token需要自己在tushare网上上获得
+        ts.set_token('df295ed799578d45256a54380d7716c1653b50afe46716290c41deb4')#token需要自己在tushare网上上获得
         pro = ts.pro_api()
         code = str(self.qle.text())
-        begin_date = '20200709'
-        end_date = '20210219'
+        today = datetime.date.today()
+        begin_day = today - datetime.timedelta(days=365)
+        begin_date = begin_day.strftime("%Y%m%d")
+        end_date = today.strftime("%Y%m%d")
         SHORT = 10  # 快速移动平均线的滑动窗口长度。
         LONG = 20  # 慢速移动平均线de 滑动窗口
         MID = 9
