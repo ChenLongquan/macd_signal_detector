@@ -11,12 +11,15 @@ detect_cross_period = 180
 class gold_death_cross():
     def detect_gold_cross(self,df,lineEdit):
         gold_cross_point_underzero = []
-        for i in range(len(df)-detect_cross_period,len(df)):
+        start_idx = len(df) - detect_cross_period
+        if (start_idx < 1):
+            start_idx = 1
+        for i in range(start_idx,len(df)):
             if (df['dif'][i]<0) & (df['dea'][i]<0):
                 if (df['dif'][i-1] < df['dea'][i-1]) & (df['dif'][i] > df['dea'][i]):
                     gold_cross_point_underzero.append(i)
         gold_cross_point_abovezero = []
-        for i in range(len(df)-detect_cross_period,len(df)):
+        for i in range(start_idx,len(df)):
             if (df['dif'][i]>0) & (df['dea'][i]>0):
                 if (df['dif'][i-1] < df['dea'][i-1]) & (df['dif'][i] > df['dea'][i]):
                     gold_cross_point_abovezero.append(i)
@@ -37,7 +40,10 @@ class gold_death_cross():
 
     def detect_gold_cross_all(self,df):
         gold_cross_point = []
-        for i in range(len(df)-detect_cross_period,len(df)):
+        start_idx = len(df) - detect_cross_period
+        if (start_idx < 1):
+            start_idx = 1
+        for i in range(start_idx,len(df)):
             if (df['dif'][i-1] < df['dea'][i-1]) & (df['dif'][i] > df['dea'][i]):
                 gold_cross_point.append(i)
 
@@ -65,7 +71,10 @@ class gold_death_cross():
 
     def detect_dead_cross_all(self,df):
         dead_cross_point = []
-        for i in range(len(df)-detect_cross_period,len(df)):
+        start_idx = len(df) - detect_cross_period
+        if (start_idx < 1):
+            start_idx = 1
+        for i in range(start_idx,len(df)):
             if (df['dif'][i-1] > df['dea'][i-1]) & (df['dif'][i] < df['dea'][i]):
                 dead_cross_point.append(i)
 
@@ -93,7 +102,10 @@ class gold_death_cross():
 
     def detect_death_cross(self,df,lineEdit):
         death_cross_point_underzero = []
-        for i in range(len(df)-detect_cross_period,len(df)):
+        start_idx = len(df) - detect_cross_period
+        if (start_idx < 1):
+            start_idx = 1
+        for i in range(start_idx,len(df)):
             if (df['dif'][i]<0) & (df['dea'][i]<0):
                 if (df['dif'][i-1] > df['dea'][i-1]) & (df['dif'][i] < df['dea'][i]):
                     death_cross_point_underzero.append(i)

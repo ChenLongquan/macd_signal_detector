@@ -67,14 +67,14 @@ if __name__ == '__main__':
             codes.append(row['code'])
 
 
-    with open(str(end_date)+'_gold.csv','wt') as f1:
+    with open('results/'+str(end_date)+'_gold.csv','wt') as f1:
         cw = csv.writer(f1)
         cw.writerow(['代号', '名字', '总斜率','最近一次斜率', '第一次金叉', '第二次金叉', '第三次金叉'])
         for code in codes:
             gold_cross_result = patch(code, True)
             if (gold_cross_result):
                 cw.writerow(gold_cross_result)
-    with open(str(end_date)+'_dead.csv','wt') as f1:
+    with open('results/'+str(end_date)+'_dead.csv','wt') as f1:
         cw = csv.writer(f1)
         cw.writerow(['代号', '名字', '总斜率','最近一次斜率', '第一次死叉', '第二次死叉', '第三次死叉'])
         for code in codes:
